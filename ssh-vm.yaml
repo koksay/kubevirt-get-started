@@ -2,6 +2,8 @@ apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
   name: testvm
+  labels:
+    hostname: testvm
 spec:
   running: true
   template:
@@ -26,7 +28,9 @@ spec:
             secret:
               secretName: my-pub-key
           propagationMethod:
-            noCloud: {}
+            qemuGuestAgent:
+              users:
+              - fedora
       volumes:
       - containerDisk:
           image: quay.io/containerdisks/fedora:latest
@@ -36,4 +40,7 @@ spec:
             #cloud-config
             password: fedora
             chpasswd: { expire: False }
+            # Disable SELinux for now, so qemu-guest-agent can write the authorized_keys file
+            bootcmd:
+              - setenforce 0
         name: cloudinitdisk
